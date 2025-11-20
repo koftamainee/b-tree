@@ -1,0 +1,25 @@
+{
+  "logging": {
+    "default": {
+      "format": "[%t] %d %s %m",
+      "streams": [
+        {
+          "path": "logs/info.log",
+          "severities": ["trace", "debug", "information"]
+        },
+        {
+          "path": "logs/warnings.log",
+          "severities": ["warning"]
+        },
+        {
+          "path": "logs/errors.log",
+          "severities": ["error", "critical"]
+        },
+        {
+          "path": "",
+          "severities": ["trace"] 
+        }
+      ]
+    }
+  }
+}

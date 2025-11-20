@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(btree LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+include(FetchContent)
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -14,6 +16,13 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3)
+
+FetchContent_MakeAvailable(json)
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 file(GLOB SOURCES src/*.cpp)
@@ -21,3 +30,11 @@ file(GLOB SOURCES src/*.cpp)
 add_executable(btree ${SOURCES})
 
 add_subdirectory(src)
+
+target_link_libraries(btree PRIVATE nlohmann_json::nlohmann_json)
+
+configure_file(
+        ${CMAKE_SOURCE_DIR}/config.json
+        ${CMAKE_BINARY_DIR}/config.json
+        COPYONLY
+)
