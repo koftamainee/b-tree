@@ -16,7 +16,7 @@ class BTreeBase : public SearchTree<Key, Value>,
                   private allocator_guardant {
  public:
   using size_type = std::size_t;
-  using comparator_t = std::function<bool(const Key&, const Key&)>;
+  using comparator_t = std::function<int(const Key&, const Key&)>;
 
  protected:
   struct Node {
@@ -38,13 +38,14 @@ class BTreeBase : public SearchTree<Key, Value>,
   Node* root = nullptr;
   size_type t;
   comparator_t comp;
+  size_type size = 0;
 
  public:
   explicit BTreeBase(size_type t_, comparator_t comp_,
                      std::shared_ptr<logger> lg,
-                     std::shared_ptr<allocator> alloc) {}
+                     std::shared_ptr<allocator> alloc) : SearchTree<Key, Value>(lg, alloc), t(t_), comp(comp_) {}
 
-  virtual ~BTreeBase() noexcept {}
+  ~BTreeBase() noexcept override {}
 
   void insert(const Key& key, const Value& value) override {}
   bool remove(const Key& key) override { return false; }
@@ -54,9 +55,11 @@ class BTreeBase : public SearchTree<Key, Value>,
   }
 
   virtual Value const& get(const Key& key) override {}
-  virtual bool contains(const Key& key) override {}
-  virtual size_type len() override {}
-  virtual Value& get_mut(const Key& key) override {}
+  bool contains(const Key& key) const override {
+
+  }
+  size_type len() const override { return size; }
+  Value& get_mut(const Key& key) override {}
 
   void clear() override {}
 
@@ -64,9 +67,28 @@ class BTreeBase : public SearchTree<Key, Value>,
 
   typename SearchTree<Key, Value>::iterator* end() override {}
 
- protected:
-  Node* allocate_node(bool leaf) {}
-  void destroy_node(Node* node) {}
+protected:
+  Node* create_node(bool leaf) {
+    Node *new_node = allocate_with_guard(sizeof(Node *));
+    if (new_node == nullptr) {
+      critical_with_guard("Failed to allocate memory for node");
+      throw std::bad_alloc();
+    }
+    allocator::construct(new_node, leaf);
+    new_node->children.resize(2 * t - 1);
+    new_node->keys.resize(2 * t - 1);
+    return new_node;
+  }
+  void destroy_node(Node* node) {
+    if (node == nullptr) {
+      return;
+    }
+    for (auto *child : node->children) {
+      destroy_node(child);
+    }
+    allocator::destruct(node);
+    allocator::deallocate(node);
+  }
 
   logger* get_logger() const override { return logger_ptr.get(); }
   allocator* get_allocator() const override { return allocator_ptr.get(); }

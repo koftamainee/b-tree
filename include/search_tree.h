@@ -31,11 +31,11 @@ class SearchTree : public AssociativeContainer<Key, Value> {
     virtual bool operator!=(const iterator& other) const = 0;
   };
 
-  virtual ~SearchTree() = default;
+  ~SearchTree() override = default;
 
   virtual iterator* begin() = 0;
   virtual iterator* end() = 0;
 
   virtual std::pair<iterator*, iterator*> find_in_range(
-      const Key& key_low, const Key& key_high) = 0;
+      const Key& key_low, const Key& key_high) const = 0;
 };

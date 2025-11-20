@@ -5,7 +5,7 @@
 #include <string>
 
 #include "allocator.h"
-#include "btree.h"
+#include "btree_base.h"
 #include "client_logger_builder.h"
 #include "logger_builder.h"
 
